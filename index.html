@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>News From All Over the World</title>
 
   <style>
@@ -31,10 +32,6 @@
       font-size: 2rem;
     }
 
-    header p {
-      margin-bottom: 0;
-    }
-
     nav {
       background: #1e4976;
       padding: 12px;
@@ -43,9 +40,10 @@
 
     nav a {
       color: white;
-      margin: 0 12px;
+      margin: 5px 12px;
       text-decoration: none;
       font-weight: bold;
+      display: inline-block;
     }
 
     main {
@@ -85,8 +83,8 @@
       border-left-color: #0284c7;
     }
 
-    .hurricane-card {
-      border-left-color: #7c3aed;
+    .wildfire-card {
+      border-left-color: #ea580c;
     }
 
     button {
@@ -126,11 +124,6 @@
         font-size: 1.6rem;
       }
 
-      nav a {
-        display: inline-block;
-        margin: 5px;
-      }
-
       .disaster-section {
         padding: 16px;
       }
@@ -147,17 +140,22 @@
   <nav>
     <a href="#earthquakes">Earthquakes</a>
     <a href="#floods">Flood Alerts</a>
-    <a href="#hurricanes">Hurricanes</a>
+    <a href="#wildfires">Wildfires</a>
   </nav>
 
   <main>
     <!-- EARTHQUAKES -->
     <section class="disaster-section" id="earthquakes">
       <h2>🌍 Recent Earthquakes</h2>
-      <p>Recent earthquakes worldwide, provided by the US Geological Survey.</p>
+      <p>
+        Recent earthquakes worldwide, provided by the
+        U.S. Geological Survey (USGS).
+      </p>
 
       <button onclick="loadEarthquakes()">Refresh Earthquakes</button>
-      <p class="status" id="earthquake-status">Loading earthquake data...</p>
+      <p class="status" id="earthquake-status">
+        Loading earthquake data...
+      </p>
       <div id="earthquake-list"></div>
 
       <p>
@@ -172,12 +170,14 @@
     <section class="disaster-section" id="floods">
       <h2>🌊 Active Flood Alerts</h2>
       <p>
-        Active flood-related weather alerts from the U.S. National Weather Service.
-        These alerts cover the United States and its service areas, not the entire world.
+        Active flood-related alerts from the U.S. National Weather
+        Service. These alerts do not cover the entire world.
       </p>
 
       <button onclick="loadFloodAlerts()">Refresh Flood Alerts</button>
-      <p class="status" id="flood-status">Loading flood alerts...</p>
+      <p class="status" id="flood-status">
+        Loading flood alerts...
+      </p>
       <div id="flood-list"></div>
 
       <p>
@@ -188,22 +188,24 @@
       </p>
     </section>
 
-    <!-- HURRICANES -->
-    <section class="disaster-section" id="hurricanes">
-      <h2>🌀 Hurricane & Tropical Storm Updates</h2>
+    <!-- WILDFIRES -->
+    <section class="disaster-section" id="wildfires">
+      <h2>🔥 Current Wildfire Incidents</h2>
       <p>
-        Official tropical cyclone updates from the National Hurricane Center.
-        The feeds below cover the Atlantic, Eastern Pacific, and Central Pacific.
+        Wildfire incident information from a public ArcGIS service.
+        Coverage and reporting times may vary.
       </p>
 
-      <button onclick="loadHurricanes()">Refresh Hurricane Updates</button>
-      <p class="status" id="hurricane-status">Loading hurricane updates...</p>
-      <div id="hurricane-list"></div>
+      <button onclick="loadWildfires()">Refresh Wildfires</button>
+      <p class="status" id="wildfire-status">
+        Loading wildfire information...
+      </p>
+      <div id="wildfire-list"></div>
 
       <p>
-        <a href="https://www.nhc.noaa.gov/"
+        <a href="https://www.nifc.gov/fire-information"
            target="_blank" rel="noopener">
-          Visit the official National Hurricane Center
+          Visit the National Interagency Fire Center
         </a>
       </p>
     </section>
@@ -220,7 +222,7 @@
   </footer>
 
   <script>
-    // Helper: safely create a link.
+    // HELPER: Create a safe external link.
     function createLink(url, text) {
       const link = document.createElement("a");
       link.href = url;
@@ -230,13 +232,14 @@
       return link;
     }
 
-    // Update the time when data has loaded successfully.
+    // Show when a feed successfully updates.
     function updateTimestamp() {
       document.getElementById("last-updated").textContent =
-        "Last successful data update: " + new Date().toLocaleString();
+        "Last successful data update: " +
+        new Date().toLocaleString();
     }
 
-    // EARTHQUAKE DATA
+    // 1. EARTHQUAKE DATA
     async function loadEarthquakes() {
       const list = document.getElementById("earthquake-list");
       const status = document.getElementById("earthquake-status");
@@ -254,13 +257,13 @@
         }
 
         const data = await response.json();
+        const earthquakes = (data.features || []).slice(0, 20);
 
-        if (!data.features || data.features.length === 0) {
-          status.textContent = "No earthquake records were returned.";
+        if (earthquakes.length === 0) {
+          status.textContent =
+            "No earthquake records were returned.";
           return;
         }
-
-        const earthquakes = data.features.slice(0, 20);
 
         for (const quake of earthquakes) {
           const properties = quake.properties;
@@ -276,8 +279,7 @@
             properties.place || "Unknown location";
 
           magnitude.textContent =
-            "Magnitude: " +
-            (properties.mag ?? "Not reported");
+            "Magnitude: " + (properties.mag ?? "Not reported");
 
           location.textContent =
             "Coordinates: " +
@@ -304,13 +306,13 @@
 
         updateTimestamp();
       } catch (error) {
+        console.error("Earthquake error:", error);
         status.textContent =
           "Earthquake data could not load. Please try again.";
-        console.error("Earthquake error:", error);
       }
     }
 
-    // FLOOD ALERT DATA
+    // 2. FLOOD ALERT DATA
     async function loadFloodAlerts() {
       const list = document.getElementById("flood-list");
       const status = document.getElementById("flood-status");
@@ -330,8 +332,7 @@
         const data = await response.json();
 
         const alerts = (data.features || []).filter((alert) => {
-          const event = alert.properties.event || "";
-          return /flood/i.test(event);
+          return /flood/i.test(alert.properties.event || "");
         });
 
         if (alerts.length === 0) {
@@ -348,26 +349,25 @@
 
           const heading = document.createElement("h3");
           const area = document.createElement("p");
-          const urgency = document.createElement("p");
+          const severity = document.createElement("p");
           const details = document.createElement("p");
 
           heading.textContent =
             properties.event || "Flood alert";
 
           area.textContent =
-            "Area: " +
-            (properties.areaDesc || "Area not specified");
+            "Area: " + (properties.areaDesc || "Not specified");
 
-          urgency.textContent =
+          severity.textContent =
             "Severity: " +
             (properties.severity || "Not specified");
 
           details.textContent =
             properties.headline ||
             properties.description ||
-            "See the official alert for more details.";
+            "See the official alert for details.";
 
-          card.append(heading, area, urgency, details);
+          card.append(heading, area, severity, details);
 
           if (properties.expires) {
             const expires = document.createElement("p");
@@ -388,133 +388,130 @@
 
         status.textContent =
           "Showing " + Math.min(alerts.length, 20) +
-          " of " + alerts.length + " active flood-related alerts.";
+          " of " + alerts.length +
+          " active flood-related alerts.";
 
         updateTimestamp();
       } catch (error) {
-        status.textContent =
-          "Flood alerts could not load. Please try the official " +
-          "National Weather Service link below.";
         console.error("Flood alert error:", error);
+        status.textContent =
+          "Flood alerts could not load. Use the official " +
+          "National Weather Service link below.";
       }
     }
 
-    // HURRICANE AND TROPICAL STORM DATA
-    async function loadHurricanes() {
-      const list = document.getElementById("hurricane-list");
-      const status = document.getElementById("hurricane-status");
+    // 3. WILDFIRE DATA
+    async function loadWildfires() {
+      const list = document.getElementById("wildfire-list");
+      const status = document.getElementById("wildfire-status");
 
-      status.textContent = "Checking official tropical weather feeds...";
+      status.textContent = "Loading wildfire incidents...";
       list.replaceChildren();
 
-      const feeds = [
-        {
-          name: "Atlantic",
-          url: "https://www.nhc.noaa.gov/index-at.xml"
-        },
-        {
-          name: "Eastern Pacific",
-          url: "https://www.nhc.noaa.gov/index-ep.xml"
-        },
-        {
-          name: "Central Pacific",
-          url: "https://www.nhc.noaa.gov/index-cp.xml"
+      const url =
+        "https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/" +
+        "WFIGS_Incident_Locations_Current/FeatureServer/0/query" +
+        "?where=IncidentTypeCategory%3D%27WF%27" +
+        "&outFields=IncidentName,POOState,POOCity,IncidentSize," +
+        "PercentContained,FireDiscoveryDateTime" +
+        "&orderByFields=FireDiscoveryDateTime%20DESC" +
+        "&resultRecordCount=15&returnGeometry=false&f=json";
+
+      try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error("Wildfire service unavailable");
         }
-      ];
 
-      let count = 0;
-      let successfulFeeds = 0;
+        const data = await response.json();
 
-      for (const feed of feeds) {
-        try {
-          const response = await fetch(feed.url);
+        if (data.error) {
+          throw new Error("The wildfire service returned an error");
+        }
 
-          if (!response.ok) {
-            throw new Error("Feed unavailable");
-          }
+        const fires = data.features || [];
 
-          const xmlText = await response.text();
-          const xml = new DOMParser().parseFromString(
-            xmlText,
-            "text/xml"
+        if (fires.length === 0) {
+          status.textContent =
+            "No wildfire incidents were returned by this service.";
+          return;
+        }
+
+        for (const feature of fires) {
+          const fire = feature.attributes;
+          const card = document.createElement("article");
+          card.className = "wildfire-card";
+
+          const heading = document.createElement("h3");
+          heading.textContent =
+            fire.IncidentName || "Unnamed wildfire";
+
+          const location = document.createElement("p");
+          const place = [
+            fire.POOCity,
+            fire.POOState
+          ].filter(Boolean).join(", ");
+
+          location.textContent =
+            "Location: " + (place || "Not reported");
+
+          const size = document.createElement("p");
+          size.textContent =
+            "Reported size: " +
+            (fire.IncidentSize != null
+              ? Number(fire.IncidentSize).toLocaleString() +
+                " acres"
+              : "Not reported");
+
+          const containment = document.createElement("p");
+          containment.textContent =
+            "Reported containment: " +
+            (fire.PercentContained != null
+              ? fire.PercentContained + "%"
+              : "Not reported");
+
+          const date = document.createElement("p");
+          date.textContent =
+            "Discovery date: " +
+            (fire.FireDiscoveryDateTime
+              ? new Date(fire.FireDiscoveryDateTime).toLocaleString()
+              : "Not reported");
+
+          card.append(
+            heading,
+            location,
+            size,
+            containment,
+            date
           );
 
-          if (xml.querySelector("parsererror")) {
-            throw new Error("Could not read feed");
-          }
-
-          successfulFeeds++;
-
-          const items = xml.querySelectorAll("item");
-
-          for (const item of items) {
-            const title =
-              item.querySelector("title")?.textContent ||
-              "Tropical weather update";
-
-            const description =
-              item.querySelector("description")?.textContent ||
-              "Open the official update for details.";
-
-            const link =
-              item.querySelector("link")?.textContent ||
-              feed.url;
-
-            const card = document.createElement("article");
-            card.className = "hurricane-card";
-
-            const heading = document.createElement("h3");
-            const region = document.createElement("p");
-            const details = document.createElement("p");
-
-            heading.textContent = title;
-            region.textContent = "Region: " + feed.name;
-
-            // Feed descriptions may contain HTML, so display them as text.
-            details.textContent = description;
-
-            card.append(heading, region, details);
-            card.appendChild(
-              createLink(link, "Read official update")
-            );
-
-            list.appendChild(card);
-            count++;
-          }
-        } catch (error) {
-          console.error(
-            "Could not load " + feed.name + " feed:",
-            error
-          );
+          list.appendChild(card);
         }
-      }
 
-      if (count > 0) {
         status.textContent =
-          "Loaded " + count + " tropical weather update(s).";
+          "Showing " + fires.length +
+          " wildfire incidents returned by the service.";
+
         updateTimestamp();
-      } else if (successfulFeeds > 0) {
+      } catch (error) {
+        console.error("Wildfire error:", error);
         status.textContent =
-          "The feeds loaded, but no update items were returned. " +
-          "Check the official National Hurricane Center website.";
-        updateTimestamp();
-      } else {
-        status.textContent =
-          "The feeds could not be loaded directly in this browser. " +
-          "Use the official National Hurricane Center link below.";
+          "Wildfire data could not load. Please use the official " +
+          "National Interagency Fire Center link below.";
       }
     }
 
-    // LOAD ALL THREE SECTIONS WHEN THE PAGE OPENS.
+    // LOAD ALL SECTIONS WHEN THE WEBSITE OPENS.
     loadEarthquakes();
     loadFloodAlerts();
-    loadHurricanes();
+    loadWildfires();
 
-    // Refresh all sections every five minutes.
+    // REFRESH EVERY FIVE MINUTES.
     setInterval(() => {
       loadEarthquakes();
       loadFloodAlerts();
-      loadHurricanes();
+      loadWildfires();
     }, 5 * 60 * 1000);
   </script>
 </body>
