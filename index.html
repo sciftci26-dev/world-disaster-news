@@ -4,13 +4,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>News From All Over the World</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -27,10 +24,7 @@
       padding: 30px 15px;
     }
 
-    header h1 {
-      margin: 0;
-      font-size: 2rem;
-    }
+    header h1 { margin: 0; font-size: 2rem; }
 
     nav {
       background: #1e4976;
@@ -47,23 +41,52 @@
     }
 
     main {
-      max-width: 900px;
+      max-width: 950px;
       margin: 25px auto;
       padding: 0 15px;
     }
 
-    .disaster-section {
+    .disaster-section, .search-section {
       background: white;
       margin-bottom: 25px;
       padding: 22px;
       border-radius: 12px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 3px 10px rgba(0,0,0,.08);
     }
 
-    h2 {
-      color: #12345a;
-      margin-top: 0;
+    h2 { color: #12345a; margin-top: 0; }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #94a3b8;
+      border-radius: 6px;
+      font-size: 1rem;
+      margin: 8px 0 12px;
     }
+
+    .checks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin: 12px 0 18px;
+    }
+
+    .checks label { cursor: pointer; }
+
+    button {
+      background: #1d4ed8;
+      color: white;
+      border: none;
+      padding: 11px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    button:hover { background: #1e40af; }
+
+    button:disabled { opacity: .6; cursor: wait; }
 
     article {
       background: #f8fafc;
@@ -74,42 +97,12 @@
       overflow-wrap: anywhere;
     }
 
-    article h3 {
-      margin-top: 0;
-      color: #12345a;
-    }
+    article h3 { margin-top: 0; color: #12345a; }
+    .flood-card { border-left-color: #0284c7; }
+    .wildfire-card { border-left-color: #ea580c; }
 
-    .flood-card {
-      border-left-color: #0284c7;
-    }
-
-    .wildfire-card {
-      border-left-color: #ea580c;
-    }
-
-    button {
-      background: #1d4ed8;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 1rem;
-      margin-bottom: 10px;
-    }
-
-    button:hover {
-      background: #1e40af;
-    }
-
-    a {
-      color: #1d4ed8;
-    }
-
-    .status {
-      color: #475569;
-      font-size: 0.95rem;
-    }
+    .status { color: #475569; font-size: .95rem; }
+    a { color: #1d4ed8; }
 
     footer {
       background: #12345a;
@@ -120,13 +113,8 @@
     }
 
     @media (max-width: 600px) {
-      header h1 {
-        font-size: 1.6rem;
-      }
-
-      .disaster-section {
-        padding: 16px;
-      }
+      header h1 { font-size: 1.6rem; }
+      .disaster-section, .search-section { padding: 16px; }
     }
   </style>
 </head>
@@ -134,385 +122,527 @@
 <body>
   <header>
     <h1>🌎 News From All Over the World</h1>
-    <p>Stay informed about natural disasters and severe weather.</p>
+    <p>Search for natural disasters around the world.</p>
   </header>
 
   <nav>
+    <a href="#search">Search</a>
     <a href="#earthquakes">Earthquakes</a>
-    <a href="#floods">Flood Alerts</a>
+    <a href="#floods">Floods</a>
     <a href="#wildfires">Wildfires</a>
   </nav>
 
   <main>
-    <!-- EARTHQUAKES -->
-    <section class="disaster-section" id="earthquakes">
-      <h2>🌍 Recent Earthquakes</h2>
-      <p>
-        Recent earthquakes worldwide, provided by the
-        U.S. Geological Survey (USGS).
-      </p>
+    <section class="search-section" id="search">
+      <h2>🔎 Find Disasters by Country</h2>
+      <p>Enter a country and select the disasters you want to investigate.</p>
 
-      <button onclick="loadEarthquakes()">Refresh Earthquakes</button>
+      <form id="search-form">
+        <label for="country-input"><strong>Country name</strong></label>
+        <input
+          id="country-input"
+          type="text"
+          placeholder="For example: Japan, Brazil, Australia"
+          required
+        >
+
+        <div class="checks">
+          <label>
+            <input type="checkbox" id="check-earthquakes" checked>
+            🌍 Earthquakes
+          </label>
+
+          <label>
+            <input type="checkbox" id="check-floods" checked>
+            🌊 Flood alerts
+          </label>
+
+          <label>
+            <input type="checkbox" id="check-wildfires" checked>
+            🔥 Fire hotspots
+          </label>
+        </div>
+
+        <button type="submit" id="search-button">Search Country</button>
+      </form>
+
+      <p class="status" id="search-status">
+        Enter a country to begin.
+      </p>
+      <p class="status">
+        Data sources have different coverage and update times.
+        No results does not necessarily mean there is no danger.
+      </p>
+    </section>
+
+    <section class="disaster-section" id="earthquakes">
+      <h2>🌍 Earthquakes</h2>
       <p class="status" id="earthquake-status">
-        Loading earthquake data...
+        Search for a country to see results.
       </p>
       <div id="earthquake-list"></div>
-
-      <p>
-        <a href="https://earthquake.usgs.gov/earthquakes/map/"
-           target="_blank" rel="noopener">
-          Explore the official USGS earthquake map
-        </a>
-      </p>
     </section>
 
-    <!-- FLOOD ALERTS -->
     <section class="disaster-section" id="floods">
-      <h2>🌊 Active Flood Alerts</h2>
-      <p>
-        Active flood-related alerts from the U.S. National Weather
-        Service. These alerts do not cover the entire world.
-      </p>
-
-      <button onclick="loadFloodAlerts()">Refresh Flood Alerts</button>
+      <h2>🌊 Flood Alerts</h2>
       <p class="status" id="flood-status">
-        Loading flood alerts...
+        Search for a country to see available alerts.
       </p>
       <div id="flood-list"></div>
-
       <p>
-        <a href="https://www.weather.gov/"
-           target="_blank" rel="noopener">
-          Visit the National Weather Service
+        <a href="https://www.gdacs.org/" target="_blank" rel="noopener">
+          Visit the Global Disaster Alert and Coordination System
         </a>
       </p>
     </section>
 
-    <!-- WILDFIRES -->
     <section class="disaster-section" id="wildfires">
-      <h2>🔥 Current Wildfire Incidents</h2>
+      <h2>🔥 Satellite Fire Hotspots</h2>
       <p>
-        Wildfire incident information from a public ArcGIS service.
-        Coverage and reporting times may vary.
+        Satellite-detected thermal hotspots from the last several days.
+        A hotspot can indicate a fire, but it is not confirmation of a wildfire.
       </p>
-
-      <button onclick="loadWildfires()">Refresh Wildfires</button>
       <p class="status" id="wildfire-status">
-        Loading wildfire information...
+        Search for a country to see results.
       </p>
       <div id="wildfire-list"></div>
-
       <p>
-        <a href="https://www.nifc.gov/fire-information"
+        <a href="https://www.arcgis.com/home/item.html?id=dece90af1a0242dcbf0ca36d30276aa3"
            target="_blank" rel="noopener">
-          Visit the National Interagency Fire Center
+          View the global satellite fire data source
         </a>
       </p>
     </section>
 
-    <p class="status" id="last-updated">
-      Waiting for data...
-    </p>
+    <p class="status" id="last-updated"></p>
   </main>
 
   <footer>
     <p>News From All Over the World</p>
     <p>Stay informed. Stay prepared.</p>
-    <p>Always follow official emergency instructions.</p>
+    <p>For emergencies, follow local official instructions.</p>
   </footer>
 
   <script>
-    // HELPER: Create a safe external link.
-    function createLink(url, text) {
-      const link = document.createElement("a");
-      link.href = url;
-      link.textContent = text;
-      link.target = "_blank";
-      link.rel = "noopener";
-      return link;
+    const $ = (id) => document.getElementById(id);
+
+    function makeLink(url, text) {
+      const a = document.createElement("a");
+      a.href = url;
+      a.textContent = text;
+      a.target = "_blank";
+      a.rel = "noopener";
+      return a;
     }
 
-    // Show when a feed successfully updates.
-    function updateTimestamp() {
-      document.getElementById("last-updated").textContent =
-        "Last successful data update: " +
-        new Date().toLocaleString();
-    }
+    function makeCard(title, lines, link, linkText, className = "") {
+      const card = document.createElement("article");
+      if (className) card.className = className;
 
-    // 1. EARTHQUAKE DATA
-    async function loadEarthquakes() {
-      const list = document.getElementById("earthquake-list");
-      const status = document.getElementById("earthquake-status");
+      const heading = document.createElement("h3");
+      heading.textContent = title || "Unnamed event";
+      card.appendChild(heading);
 
-      status.textContent = "Loading earthquakes...";
-      list.replaceChildren();
-
-      try {
-        const response = await fetch(
-          "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson"
-        );
-
-        if (!response.ok) {
-          throw new Error("Earthquake feed unavailable");
-        }
-
-        const data = await response.json();
-        const earthquakes = (data.features || []).slice(0, 20);
-
-        if (earthquakes.length === 0) {
-          status.textContent =
-            "No earthquake records were returned.";
-          return;
-        }
-
-        for (const quake of earthquakes) {
-          const properties = quake.properties;
-          const coordinates = quake.geometry.coordinates;
-
-          const card = document.createElement("article");
-          const heading = document.createElement("h3");
-          const magnitude = document.createElement("p");
-          const location = document.createElement("p");
-          const time = document.createElement("p");
-
-          heading.textContent =
-            properties.place || "Unknown location";
-
-          magnitude.textContent =
-            "Magnitude: " + (properties.mag ?? "Not reported");
-
-          location.textContent =
-            "Coordinates: " +
-            coordinates[1] + ", " + coordinates[0];
-
-          time.textContent =
-            "Time: " +
-            new Date(properties.time).toLocaleString();
-
-          card.append(heading, magnitude, location, time);
-
-          if (properties.url) {
-            card.appendChild(
-              createLink(properties.url, "View earthquake details")
-            );
-          }
-
-          list.appendChild(card);
-        }
-
-        status.textContent =
-          "Showing " + earthquakes.length +
-          " earthquake records from the past day.";
-
-        updateTimestamp();
-      } catch (error) {
-        console.error("Earthquake error:", error);
-        status.textContent =
-          "Earthquake data could not load. Please try again.";
+      for (const line of lines) {
+        const p = document.createElement("p");
+        p.textContent = line;
+        card.appendChild(p);
       }
-    }
 
-    // 2. FLOOD ALERT DATA
-    async function loadFloodAlerts() {
-      const list = document.getElementById("flood-list");
-      const status = document.getElementById("flood-status");
-
-      status.textContent = "Checking active flood alerts...";
-      list.replaceChildren();
-
-      try {
-        const response = await fetch(
-          "https://api.weather.gov/alerts/active?status=actual"
-        );
-
-        if (!response.ok) {
-          throw new Error("Flood alert feed unavailable");
-        }
-
-        const data = await response.json();
-
-        const alerts = (data.features || []).filter((alert) => {
-          return /flood/i.test(alert.properties.event || "");
-        });
-
-        if (alerts.length === 0) {
-          status.textContent =
-            "No active flood-related alerts were found in this feed.";
-          updateTimestamp();
-          return;
-        }
-
-        for (const alert of alerts.slice(0, 20)) {
-          const properties = alert.properties;
-          const card = document.createElement("article");
-          card.className = "flood-card";
-
-          const heading = document.createElement("h3");
-          const area = document.createElement("p");
-          const severity = document.createElement("p");
-          const details = document.createElement("p");
-
-          heading.textContent =
-            properties.event || "Flood alert";
-
-          area.textContent =
-            "Area: " + (properties.areaDesc || "Not specified");
-
-          severity.textContent =
-            "Severity: " +
-            (properties.severity || "Not specified");
-
-          details.textContent =
-            properties.headline ||
-            properties.description ||
-            "See the official alert for details.";
-
-          card.append(heading, area, severity, details);
-
-          if (properties.expires) {
-            const expires = document.createElement("p");
-            expires.textContent =
-              "Expires: " +
-              new Date(properties.expires).toLocaleString();
-            card.appendChild(expires);
-          }
-
-          if (properties.web) {
-            card.appendChild(
-              createLink(properties.web, "Read official alert")
-            );
-          }
-
-          list.appendChild(card);
-        }
-
-        status.textContent =
-          "Showing " + Math.min(alerts.length, 20) +
-          " of " + alerts.length +
-          " active flood-related alerts.";
-
-        updateTimestamp();
-      } catch (error) {
-        console.error("Flood alert error:", error);
-        status.textContent =
-          "Flood alerts could not load. Use the official " +
-          "National Weather Service link below.";
+      if (link) {
+        card.appendChild(makeLink(link, linkText || "Read more"));
       }
+
+      return card;
     }
 
-    // 3. WILDFIRE DATA
-    async function loadWildfires() {
-      const list = document.getElementById("wildfire-list");
-      const status = document.getElementById("wildfire-status");
+    function setMessage(id, message) {
+      $(id).textContent = message;
+    }
 
-      status.textContent = "Loading wildfire incidents...";
-      list.replaceChildren();
+    function clearResults() {
+      $("earthquake-list").replaceChildren();
+      $("flood-list").replaceChildren();
+      $("wildfire-list").replaceChildren();
+
+      setMessage("earthquake-status", "Waiting for search...");
+      setMessage("flood-status", "Waiting for search...");
+      setMessage("wildfire-status", "Waiting for search...");
+    }
+
+    // Check whether a longitude/latitude point falls inside
+    // a GeoJSON Polygon or MultiPolygon.
+    function pointInRing(point, ring) {
+      const x = point[0];
+      const y = point[1];
+      let inside = false;
+
+      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const xi = ring[i][0], yi = ring[i][1];
+        const xj = ring[j][0], yj = ring[j][1];
+
+        const crosses =
+          ((yi > y) !== (yj > y)) &&
+          (x < (xj - xi) * (y - yi) / ((yj - yi) || 1e-20) + xi);
+
+        if (crosses) inside = !inside;
+      }
+
+      return inside;
+    }
+
+    function pointInPolygon(point, polygon) {
+      if (!polygon || !polygon.length || !pointInRing(point, polygon[0])) {
+        return false;
+      }
+
+      // Exclude holes in the polygon.
+      for (let i = 1; i < polygon.length; i++) {
+        if (pointInRing(point, polygon[i])) return false;
+      }
+
+      return true;
+    }
+
+    function pointInGeometry(point, geometry) {
+      if (!geometry) return false;
+
+      if (geometry.type === "Polygon") {
+        return pointInPolygon(point, geometry.coordinates);
+      }
+
+      if (geometry.type === "MultiPolygon") {
+        return geometry.coordinates.some(
+          polygon => pointInPolygon(point, polygon)
+        );
+      }
+
+      return false;
+    }
+
+    async function getCountry(name) {
+      const url =
+        "https://nominatim.openstreetmap.org/search?format=jsonv2" +
+        "&featuretype=country&polygon_geojson=1&limit=1&q=" +
+        encodeURIComponent(name);
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error("Country search service unavailable.");
+      }
+
+      const results = await response.json();
+
+      if (!results.length || !results[0].geojson) {
+        throw new Error(
+          "Country not found. Check the spelling and try again."
+        );
+      }
+
+      return results[0];
+    }
+
+    // EARTHQUAKES: retrieve recent global events and keep
+    // only points inside the selected country's boundary.
+    async function searchEarthquakes(country) {
+      setMessage("earthquake-status", "Searching worldwide earthquake data...");
+      $("earthquake-list").replaceChildren();
+
+      const response = await fetch(
+        "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson"
+      );
+
+      if (!response.ok) throw new Error("Earthquake service unavailable.");
+
+      const data = await response.json();
+
+      const matches = (data.features || []).filter(feature => {
+        const coords = feature.geometry.coordinates;
+        return pointInGeometry([coords[0], coords[1]], country.geojson);
+      });
+
+      if (!matches.length) {
+        setMessage(
+          "earthquake-status",
+          "No earthquakes from the past day were found inside this country in the USGS feed."
+        );
+        return;
+      }
+
+      for (const quake of matches.slice(0, 30)) {
+        const p = quake.properties;
+        $("earthquake-list").appendChild(
+          makeCard(
+            p.place || "Earthquake",
+            [
+              "Magnitude: " + (p.mag ?? "Not reported"),
+              "Time: " + new Date(p.time).toLocaleString()
+            ],
+            p.url,
+            "View USGS details"
+          )
+        );
+      }
+
+      setMessage(
+        "earthquake-status",
+        "Found " + matches.length +
+        " earthquake(s) in the past day. Showing up to 30."
+      );
+    }
+
+    // FLOODS: use the worldwide GDACS flood-event API.
+    // Filter its event text by the selected country name.
+    async function searchFloods(country) {
+      setMessage("flood-status", "Checking global disaster alerts...");
+      $("flood-list").replaceChildren();
+
+      const today = new Date();
+      const start = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+      const dateString = d => d.toISOString().slice(0, 10);
 
       const url =
-        "https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/" +
-        "WFIGS_Incident_Locations_Current/FeatureServer/0/query" +
-        "?where=IncidentTypeCategory%3D%27WF%27" +
-        "&outFields=IncidentName,POOState,POOCity,IncidentSize," +
-        "PercentContained,FireDiscoveryDateTime" +
-        "&orderByFields=FireDiscoveryDateTime%20DESC" +
-        "&resultRecordCount=15&returnGeometry=false&f=json";
+        "https://www.gdacs.org/gdacsapi/api/events/geteventlist/SEARCH" +
+        "?eventlist=FL" +
+        "&fromdate=" + dateString(start) +
+        "&todate=" + dateString(today);
 
-      try {
-        const response = await fetch(url);
+      const response = await fetch(url);
 
-        if (!response.ok) {
-          throw new Error("Wildfire service unavailable");
-        }
+      if (!response.ok) throw new Error("Global flood-alert service unavailable.");
 
-        const data = await response.json();
+      const data = await response.json();
+      const features = Array.isArray(data.features)
+        ? data.features
+        : (Array.isArray(data) ? data : []);
 
-        if (data.error) {
-          throw new Error("The wildfire service returned an error");
-        }
+      const countryName = country.display_name.split(",")[0].trim().toLowerCase();
 
-        const fires = data.features || [];
+      const matches = features.filter(feature => {
+        const p = feature.properties || feature;
+        const text = [
+          p.name, p.title, p.country, p.fromname, p.description,
+          p.eventname, p.location
+        ].filter(Boolean).join(" ").toLowerCase();
 
-        if (fires.length === 0) {
-          status.textContent =
-            "No wildfire incidents were returned by this service.";
-          return;
-        }
+        return text.includes(countryName);
+      });
 
-        for (const feature of fires) {
-          const fire = feature.attributes;
-          const card = document.createElement("article");
-          card.className = "wildfire-card";
-
-          const heading = document.createElement("h3");
-          heading.textContent =
-            fire.IncidentName || "Unnamed wildfire";
-
-          const location = document.createElement("p");
-          const place = [
-            fire.POOCity,
-            fire.POOState
-          ].filter(Boolean).join(", ");
-
-          location.textContent =
-            "Location: " + (place || "Not reported");
-
-          const size = document.createElement("p");
-          size.textContent =
-            "Reported size: " +
-            (fire.IncidentSize != null
-              ? Number(fire.IncidentSize).toLocaleString() +
-                " acres"
-              : "Not reported");
-
-          const containment = document.createElement("p");
-          containment.textContent =
-            "Reported containment: " +
-            (fire.PercentContained != null
-              ? fire.PercentContained + "%"
-              : "Not reported");
-
-          const date = document.createElement("p");
-          date.textContent =
-            "Discovery date: " +
-            (fire.FireDiscoveryDateTime
-              ? new Date(fire.FireDiscoveryDateTime).toLocaleString()
-              : "Not reported");
-
-          card.append(
-            heading,
-            location,
-            size,
-            containment,
-            date
-          );
-
-          list.appendChild(card);
-        }
-
-        status.textContent =
-          "Showing " + fires.length +
-          " wildfire incidents returned by the service.";
-
-        updateTimestamp();
-      } catch (error) {
-        console.error("Wildfire error:", error);
-        status.textContent =
-          "Wildfire data could not load. Please use the official " +
-          "National Interagency Fire Center link below.";
+      if (!matches.length) {
+        setMessage(
+          "flood-status",
+          "No matching flood events were found in the recent GDACS results. " +
+          "This does not prove that the country has no flooding."
+        );
+        return;
       }
+
+      for (const feature of matches.slice(0, 20)) {
+        const p = feature.properties || feature;
+        const title = p.name || p.title || "Flood event";
+        const detail = [
+          "Location: " + (p.country || p.fromname || "Not specified"),
+          "Alert level: " + (p.alertlevel || p.alertLevel || "Not specified"),
+          "Date: " + (p.fromdate || p.todate || "Not specified")
+        ];
+
+        const eventUrl = p.url || p.link || "https://www.gdacs.org/";
+        $("flood-list").appendChild(
+          makeCard(title, detail, eventUrl, "View disaster information", "flood-card")
+        );
+      }
+
+      setMessage(
+        "flood-status",
+        "Found " + matches.length +
+        " possible matching flood event(s) in the returned GDACS data."
+      );
     }
 
-    // LOAD ALL SECTIONS WHEN THE WEBSITE OPENS.
-    loadEarthquakes();
-    loadFloodAlerts();
-    loadWildfires();
+    // WILDFIRES: query the global VIIRS satellite hotspot service
+    // using the country's bounding box, then check the actual boundary.
+    async function searchWildfires(country) {
+      setMessage("wildfire-status", "Searching global satellite fire hotspots...");
+      $("wildfire-list").replaceChildren();
 
-    // REFRESH EVERY FIVE MINUTES.
-    setInterval(() => {
-      loadEarthquakes();
-      loadFloodAlerts();
-      loadWildfires();
-    }, 5 * 60 * 1000);
+      // Nominatim boundingbox order: south, north, west, east.
+      const box = country.boundingbox.map(Number);
+      const south = box[0], north = box[1];
+      const west = box[2], east = box[3];
+
+      const geometry = JSON.stringify({
+        xmin: west,
+        ymin: south,
+        xmax: east,
+        ymax: north,
+        spatialReference: { wkid: 4326 }
+      });
+
+      const params = new URLSearchParams({
+        where: "1=1",
+        geometry: geometry,
+        geometryType: "esriGeometryEnvelope",
+        inSR: "4326",
+        spatialRel: "esriSpatialRelIntersects",
+        outFields: "OBJECTID,latitude,longitude,frp,daynight,hours_old,satellite,esritimeutc",
+        returnGeometry: "false",
+        resultRecordCount: "500",
+        orderByFields: "hours_old ASC",
+        f: "json"
+      });
+
+      const url =
+        "https://services9.arcgis.com/RHVPKKiFTONKtxq3/arcgis/rest/services/" +
+        "Satellite_VIIRS_Thermal_Hotspots_and_Fire_Activity/FeatureServer/0/query?" +
+        params.toString();
+
+      const response = await fetch(url);
+
+      if (!response.ok) throw new Error("Global fire-hotspot service unavailable.");
+
+      const data = await response.json();
+
+      if (data.error) throw new Error("Fire-hotspot service returned an error.");
+
+      const features = data.features || [];
+
+      const matches = features.filter(feature => {
+        const p = feature.attributes;
+        if (p.latitude == null || p.longitude == null) return false;
+
+        return pointInGeometry(
+          [Number(p.longitude), Number(p.latitude)],
+          country.geojson
+        );
+      });
+
+      if (!matches.length) {
+        setMessage(
+          "wildfire-status",
+          "No satellite hotspots were found in the returned data for this country. " +
+          "Cloud cover, satellite coverage, and data limits can affect detections."
+        );
+        return;
+      }
+
+      for (const feature of matches.slice(0, 30)) {
+        const p = feature.attributes;
+
+        $("wildfire-list").appendChild(
+          makeCard(
+            "Satellite fire hotspot",
+            [
+              "Coordinates: " + p.latitude + ", " + p.longitude,
+              "Detection age: " +
+                (p.hours_old != null ? p.hours_old + " hours" : "Not reported"),
+              "Fire radiative power: " +
+                (p.frp != null ? p.frp + " MW" : "Not reported"),
+              "Day or night: " + (p.daynight || "Not reported")
+            ],
+            "https://www.arcgis.com/home/item.html?id=dece90af1a0242dcbf0ca36d30276aa3",
+            "View source information",
+            "wildfire-card"
+          )
+        );
+      }
+
+      setMessage(
+        "wildfire-status",
+        "Found " + matches.length +
+        " satellite hotspot(s) inside this country's boundary. Showing up to 30."
+      );
+    }
+
+    // MAIN COUNTRY SEARCH
+    $("search-form").addEventListener("submit", async event => {
+      event.preventDefault();
+
+      const button = $("search-button");
+      const name = $("country-input").value.trim();
+
+      const selected = {
+        earthquakes: $("check-earthquakes").checked,
+        floods: $("check-floods").checked,
+        wildfires: $("check-wildfires").checked
+      };
+
+      if (!name) return;
+
+      if (!selected.earthquakes && !selected.floods && !selected.wildfires) {
+        setMessage("search-status", "Select at least one disaster type.");
+        return;
+      }
+
+      button.disabled = true;
+      clearResults();
+      setMessage("search-status", "Finding country boundaries...");
+
+      try {
+        const country = await getCountry(name);
+
+        setMessage(
+          "search-status",
+          "Searching for disasters in: " + country.display_name
+        );
+
+        const tasks = [];
+
+        if (selected.earthquakes) {
+          tasks.push(
+            searchEarthquakes(country).catch(error => {
+              console.error(error);
+              setMessage(
+                "earthquake-status",
+                "Earthquake search failed: " + error.message
+              );
+            })
+          );
+        } else {
+          setMessage("earthquake-status", "Earthquakes not selected.");
+        }
+
+        if (selected.floods) {
+          tasks.push(
+            searchFloods(country).catch(error => {
+              console.error(error);
+              setMessage(
+                "flood-status",
+                "Flood search failed: " + error.message
+              );
+            })
+          );
+        } else {
+          setMessage("flood-status", "Flood alerts not selected.");
+        }
+
+        if (selected.wildfires) {
+          tasks.push(
+            searchWildfires(country).catch(error => {
+              console.error(error);
+              setMessage(
+                "wildfire-status",
+                "Fire-hotspot search failed: " + error.message
+              );
+            })
+          );
+        } else {
+          setMessage("wildfire-status", "Fire hotspots not selected.");
+        }
+
+        await Promise.all(tasks);
+
+        $("last-updated").textContent =
+          "Search completed: " + new Date().toLocaleString() +
+          ". Check each data source for its latest update.";
+      } catch (error) {
+        console.error(error);
+        setMessage("search-status", error.message);
+      } finally {
+        button.disabled = false;
+      }
+    });
   </script>
 </body>
 </html>
