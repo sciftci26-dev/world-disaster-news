@@ -7,7 +7,6 @@
   <meta name="theme-color" content="#10243e">
   <title>News From All Over the World</title>
 
-  <!-- Leaflet: free interactive map library -->
   <link rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
@@ -307,15 +306,15 @@
         <div class="checks">
           <label>
             <input type="checkbox" id="eq-check" checked>
-            🌍 Earthquakes
+            Earthquakes
           </label>
           <label>
             <input type="checkbox" id="flood-check" checked>
-            🌊 Flood events
+            Flood events
           </label>
           <label>
             <input type="checkbox" id="fire-check" checked>
-            🔥 Fire hotspots
+            Fire hotspots
           </label>
         </div>
 
@@ -368,7 +367,7 @@
     </section>
 
     <section class="panel" id="floods">
-      <h2>🌊 Flood Events</h2>
+      <h2> Flood Events</h2>
       <p class="status" id="flood-status">Waiting for a search.</p>
       <div id="flood-results"></div>
       <p>
@@ -379,7 +378,7 @@
     </section>
 
     <section class="panel" id="wildfires">
-      <h2>🔥 Satellite Fire Hotspots</h2>
+      <h2> Satellite Fire Hotspots</h2>
       <p class="status" id="fire-status">Waiting for a search.</p>
       <div id="fire-results"></div>
       <p class="notice">
@@ -389,7 +388,7 @@
     </section>
 
     <section class="panel">
-      <h2>ℹ️ About the Data</h2>
+      <h2> About the Data</h2>
       <p>
         Earthquakes: U.S. Geological Survey (USGS).
         Flood events: Global Disaster Alerts and Coordination System (GDACS).
@@ -418,10 +417,6 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-    // ----------------------------------------
-    // MAP SETUP
-    // ----------------------------------------
-
     const map = L.map("map").setView([20, 0], 2);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -509,10 +504,6 @@
       marker.addTo(markerLayer);
     }
 
-    // ----------------------------------------
-    // COUNTRY LOOKUP AND BOUNDARIES
-    // ----------------------------------------
-
     async function getCountry(name) {
       const url =
         "https://nominatim.openstreetmap.org/search?format=jsonv2" +
@@ -584,9 +575,6 @@
       return { south: b[0], north: b[1], west: b[2], east: b[3] };
     }
 
-    // ----------------------------------------
-    // DATE FILTER HELPERS
-    // ----------------------------------------
 
     function cutoffDate(days) {
       return Date.now() - days * 24 * 60 * 60 * 1000;
@@ -594,7 +582,7 @@
 
     function isInPeriod(value, days) {
       if (value === null || value === undefined || value === "") {
-        return true; // Keep records whose date is not supplied.
+        return true; 
       }
 
       let timestamp;
@@ -675,9 +663,7 @@
       return fallback || null;
     }
 
-    // ----------------------------------------
-    // EARTHQUAKES - USGS WORLDWIDE FEED
-    // ----------------------------------------
+
 
     async function searchEarthquakes(country, days, searchId) {
       setStatus("eq-status", "Loading earthquake records...");
@@ -740,9 +726,6 @@
       );
     }
 
-    // ----------------------------------------
-    // FLOODS - GDACS INTERNATIONAL EVENT FEED
-    // ----------------------------------------
 
     async function searchFloods(country, days, searchId) {
       setStatus("flood-status", "Loading international flood events...");
@@ -771,12 +754,10 @@
         const p = feature.properties || feature;
         const point = findCoordinate(p, feature.geometry);
 
-        // Prefer geographic matching when the source supplies coordinates.
         if (point) {
           return insideCountry([point.lon, point.lat], country.geojson);
         }
 
-        // Otherwise use a text match, which may be less accurate.
         const locationText = [
           p.name, p.title, p.country, p.fromname,
           p.description, p.eventname, p.location
@@ -830,10 +811,6 @@
         " matching GDACS event(s). Showing up to 50."
       );
     }
-
-    // ----------------------------------------
-    // SATELLITE FIRE HOTSPOTS - ARCGIS
-    // ----------------------------------------
 
     async function searchWildfires(country, days, searchId) {
       setStatus("fire-status", "Loading satellite fire hotspots...");
@@ -938,9 +915,6 @@
       );
     }
 
-    // ----------------------------------------
-    // SEARCH FORM
-    // ----------------------------------------
 
     $("search-form").addEventListener("submit", async event => {
       event.preventDefault();
@@ -990,7 +964,6 @@
           " for the past " + days + " day(s)."
         );
 
-        // Zoom the map to the selected country's boundary.
         const boundary = L.geoJSON(country.geojson, {
           style: {
             color: "#334155",
@@ -1002,8 +975,6 @@
 
         map.fitBounds(boundary.getBounds(), { padding: [15, 15] });
 
-        // Keep the boundary on the map, but remove it on the next search.
-        // Store it on the map layer group for cleanup.
         markerLayer.addLayer(boundary);
 
         const tasks = [];
