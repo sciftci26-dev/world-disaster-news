@@ -1,0 +1,105 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>News From All Over the World</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 850px;
+      margin: 30px auto;
+      padding: 0 18px;
+      background: #eef5f8;
+      color: #193447;
+    }
+    header {
+      background: #14566b;
+      color: white;
+      padding: 24px;
+      border-radius: 14px;
+      text-align: center;
+    }
+    button {
+      padding: 10px 15px;
+      border: 0;
+      border-radius: 8px;
+      background: #14566b;
+      color: white;
+      cursor: pointer;
+      margin: 5px 0;
+    }
+    article {
+      background: white;
+      padding: 16px;
+      margin: 12px 0;
+      border-radius: 10px;
+    }
+    .status { color: #425d6c; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>News From All Over the World</h1>
+    <p>Natural disaster updates from official data sources</p>
+  </header>
+
+  <h2>🌎 Latest Earthquakes</h2>
+  <p>Source: United States Geological Survey (USGS)</p>
+
+  <button onclick="loadEarthquakes()">Refresh Updates</button>
+  <p id="status" class="status">Loading earthquake data...</p>
+  <section id="news"></section>
+
+  <script>
+    const feed =
+      "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
+
+    async function loadEarthquakes() {
+      const status = document.getElementById("status");
+      const news = document.getElementById("news");
+
+      status.textContent = "Loading latest available data...";
+      news.replaceChildren();
+
+      try {
+        const response = await fetch(feed);
+
+        if (!response.ok) {
+          throw new Error("The data source returned an error.");
+        }
+
+        const data = await response.json();
+
+        for (const quake of data.features.slice(0, 5)) {
+          const details = quake.properties;
+          const card = document.createElement("article");
+          const title = document.createElement("h3");
+          const magnitude = document.createElement("p");
+          const time = document.createElement("p");
+
+          title.textContent = details.place || "Unknown location";
+          magnitude.textContent =
+            "Magnitude: " + (details.mag ?? "Unavailable");
+          time.textContent = details.time
+            ? "Time: " + new Date(details.time).toLocaleString()
+            : "Time unavailable";
+
+          card.append(title, magnitude, time);
+          news.appendChild(card);
+        }
+
+        status.textContent =
+          "Updated successfully. Times are shown in your local time zone.";
+      } catch (error) {
+        status.textContent =
+          "Couldn't load live data. Please try refreshing later.";
+      }
+    }
+
+    loadEarthquakes();
+    setInterval(loadEarthquakes, 300000);
+  </script>
+</body>
+</html>
